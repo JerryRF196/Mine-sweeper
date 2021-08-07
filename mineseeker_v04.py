@@ -231,7 +231,7 @@ def Menu():
 
 
 def Game():
-    global table_size, menu, mapp, all_cells
+    global table_size, menu, mapp, all_cells, all_mapp
     first_click = True
 
     width_table = 40 * table_size[0] +5
@@ -267,7 +267,7 @@ def Game():
             all_mapp.append([i,j])
         all_cells.append(row)
         
-    Create_Map(all_mapp, n_bombs, all_cells)    
+    # Create_Map(all_mapp, n_bombs, all_cells)    
 
         
     while not restart and not menu:
@@ -289,14 +289,19 @@ def Game():
                             menu = True
             
             if alive:
-                for row in all_cells:
-                    for cell in row:
+
+                for i in range(table_size[0]):
+                    for j in range(table_size[1]):
+                        cell = all_cells[i][j]
                         if not cell.activated:
                             if event.type == pygame.MOUSEBUTTONDOWN and cell.colour == colour2:
                                 cell.pressed = True
                             if event.type == pygame.MOUSEBUTTONUP and cell.pressed:
                                 cell.pressed = False
                                 if cell.colour == colour2:
+                                    if first_click and (event.button == 1 or event.button == 3):
+                                        Create_Map(all_mapp, n_bombs, all_cells, [i,j])
+                                        first_click = False
                                     if event.button == 1:
                                         if not cell.flag:
                                             cell.activated = True
@@ -341,7 +346,7 @@ def Game():
             for cell in row:
                 cell.draw()
         
-        Draw_text(screen,"Mines: {}".format(n_bombs - n_flag), 50, black,  125 ,400)
+        Draw_text(screen,"Mines: {}".format(n_bombs - n_flag), 50, black,  125 ,300)
         
         button_restart.draw()
         button_back.draw()
