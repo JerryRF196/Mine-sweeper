@@ -247,6 +247,7 @@ def Menu():
 
 
 def Game():
+    # TODO study optimization for global variables
     global table_size, menu, mapp, all_cells, all_mapp, n_activated
     first_click = True
 
