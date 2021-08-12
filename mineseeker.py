@@ -22,6 +22,7 @@ class Cell():
         self.flag = False
         self.activated = False
         self.number = None
+        self.drawn = True
 
     
     def draw(self):
@@ -269,6 +270,9 @@ def Game():
             all_mapp.append([i,j])
         all_cells.append(row)
         
+    #Draw just once
+    screen.fill(screen_color)
+    pygame.draw.rect(screen, table_color, (pos_x_table, pos_y_table, width_table, height_table))
 
         
     while not restart and not menu:
@@ -332,8 +336,8 @@ def Game():
         
         
         # Drawing
-        screen.fill(screen_color)
-        pygame.draw.rect(screen, table_color, (pos_x_table, pos_y_table, width_table, height_table))
+
+        pygame.draw.rect(screen, table_color, (5, 430, 250, 120))
         
         if alive and not winner:
             frames += 1
@@ -346,7 +350,10 @@ def Game():
     
         for row in all_cells:
             for cell in row:
-                cell.draw()
+                if cell.drawn:
+                    cell.draw()
+                    if cell.activated:
+                        cell.drawn = False
         
         Draw_text(screen,"Mines: {}".format(n_bombs - n_flag), 50, black, 125, 500)
         
