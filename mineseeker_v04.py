@@ -240,9 +240,11 @@ def Game():
     pos_y_table = height/2- height_table/2
     n_bombs = table_size[2]
     n_flag = 0
+    n_activated = 0
     
     alive=True
     restart = False
+    winner = False
     
     frames = 0
     seconds = 0
@@ -267,7 +269,6 @@ def Game():
             all_mapp.append([i,j])
         all_cells.append(row)
         
-    # Create_Map(all_mapp, n_bombs, all_cells)    
 
         
     while not restart and not menu:
@@ -307,6 +308,11 @@ def Game():
                                             cell.activated = True
                                             if cell.bomb:
                                                 alive = False
+                                            else:
+                                                n_activated += 1
+                                                if n_activated == table_size[0] * table_size[1]- n_bombs:
+                                                    winner = True
+                                                    pygame.time.delay(500)
                                     elif event.button == 3:
                                         cell.flag = not cell.flag
                                         n_flag += 2 * cell.flag - 1 
@@ -318,7 +324,7 @@ def Game():
         for button in all_buttons:
             button.inButton(mouse_pos)
         
-        if alive:
+        if alive and not winner:
             for row in all_cells:
                 for cell in row:
                     cell.update(mouse_pos)
@@ -329,7 +335,7 @@ def Game():
         screen.fill(screen_color)
         pygame.draw.rect(screen, table_color, (pos_x_table, pos_y_table, width_table, height_table))
         
-        if alive:
+        if alive and not winner:
             frames += 1
             if frames == 60:
                 frames = 0
@@ -338,15 +344,16 @@ def Game():
                     minutes += 1
                     seconds = 0
     
-        Draw_text(screen,"Time: " + str(minutes) +":"+ str(seconds).zfill(2), 50, black, 125, 200)
-        
-        
-        
         for row in all_cells:
             for cell in row:
                 cell.draw()
         
-        Draw_text(screen,"Mines: {}".format(n_bombs - n_flag), 50, black,  125 ,300)
+        Draw_text(screen,"Mines: {}".format(n_bombs - n_flag), 50, black, 125, 500)
+        
+        Draw_text(screen,"Time: " + str(minutes) +":"+ str(seconds).zfill(2), 50, black, 125, 430)
+        
+        if winner:
+             Draw_text(screen,"You Won!", 100, black, 201, 50)
         
         button_restart.draw()
         button_back.draw()
@@ -379,7 +386,7 @@ colour2 = (125,125,200)
 
 
 # Niveles
-easy_level = (6,8,10)
+easy_level = (6,8,4)
 medium_level = (10,14,30)
 hard_level = (15,19,50)
 
