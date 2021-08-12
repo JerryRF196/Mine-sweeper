@@ -286,7 +286,7 @@ def Game():
             all_mapp.append([i,j])
         all_cells.append(row)
         
-    #Draw just once
+    # Draw just once
     screen.fill(screen_color)
     pygame.draw.rect(screen, table_color, (pos_x_table, pos_y_table, width_table, height_table))
 
@@ -404,7 +404,7 @@ colour2 = (125,125,200)
 
 
 # Niveles
-easy_level = (6,8,4)
+easy_level = (6,8,10)
 medium_level = (10,14,30)
 hard_level = (15,19,50)
 
