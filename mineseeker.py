@@ -143,7 +143,22 @@ def Create_Map(all_mapp, n_bombs, all_cells, spot_chosen = None):
     
     return all_cells
         
-    
+
+def reveal_cell(x,y):
+    global n_activated
+    cell = all_cells[x][y]
+    if not cell.flag and not cell.activated:
+        cell.activated = True
+        if cell.bomb:
+            alive = False
+        else:
+            n_activated += 1
+            if cell.number == 0:
+                for i in range(x-1, x+2):
+                    for j in range (y-1, y+2):
+                        if i in range(table_size[0]) and j in range(table_size[1]):
+                                reveal_cell(i,j)
+
     
 
 def Menu():
@@ -232,7 +247,7 @@ def Menu():
 
 
 def Game():
-    global table_size, menu, mapp, all_cells, all_mapp
+    global table_size, menu, mapp, all_cells, all_mapp, n_activated
     first_click = True
 
     width_table = 40 * table_size[0] +5
@@ -308,15 +323,10 @@ def Game():
                                         Create_Map(all_mapp, n_bombs, all_cells, [i,j])
                                         first_click = False
                                     if event.button == 1:
-                                        if not cell.flag:
-                                            cell.activated = True
-                                            if cell.bomb:
-                                                alive = False
-                                            else:
-                                                n_activated += 1
-                                                if n_activated == table_size[0] * table_size[1]- n_bombs:
-                                                    winner = True
-                                                    pygame.time.delay(500)
+                                        reveal_cell(i,j)
+                                        if n_activated == table_size[0] * table_size[1]- n_bombs:
+                                            winner = True
+                                            pygame.time.delay(500)
                                     elif event.button == 3:
                                         cell.flag = not cell.flag
                                         n_flag += 2 * cell.flag - 1 
