@@ -72,7 +72,39 @@ class Button():
         else:
             self.color = button_color1
 
-    
+class Text():
+    def __init__(self, text, size, x, y):
+        self.text = text
+        self.size = size
+        self.x = x
+        self.y = y
+
+    def draw(self):
+        Draw_text(screen, self.text, self.size, black, self.x, self.y)
+
+class Box():
+    def __init__(self, size, x, y):
+        self.activated = False
+        self.text = ""
+        self.size = size
+        self.x = x
+        self.y = y
+        self.width = 150
+        self.height = 40
+        self.colour = button_color2
+
+    def draw(self):
+        pygame.draw.rect(screen, self.colour, (self.x, self.y, self.width, self.height))
+        Draw_text(screen, self.text, self.size, black, self.x + 25, self.y + 5)
+
+    def inBox(self, mouse):
+        if (mouse[0] in range(int(self.x), int(self.x + self.width+1))
+        and mouse[1] in range(int(self.y), int(self.y + self.height+1))):
+            self.colour = button_color1
+            self.activated = True
+        else:
+            self.colour = button_color2
+            self.activated = False
 # =============================================================================
 # Funciones
 # =============================================================================
@@ -145,7 +177,7 @@ def Create_Map(all_mapp, n_bombs, all_cells, spot_chosen = None):
         
 
 def reveal_cell(x,y):
-    global n_activated
+    global n_activated, alive 
     cell = all_cells[x][y]
     if not cell.flag and not cell.activated:
         cell.activated = True
@@ -166,37 +198,76 @@ def Menu():
     timer = 100
     drawings = False
     
-    #Botones
-    button_Start = Button( width/2 - 125, height/2, 250, 75, "Start Game" , 40)
+    ##Botones
+    #Case = 0
+    button_Start = Button(width/2 - 125, height/2, 250, 75, "Start Game" , 40)
     button_Difficult = Button(width/2 - 100, height/2 + 100, 200, 50, "Select level", 30)
+    button_Back = Button(50, 675, 150, 50, "Back", 30)
     all_buttons = [button_Start, button_Difficult]
     
+    #Case = 1
     button_Easy = Button(width/2 - 100, height/2 + 0, 200, 50, "Easy", 30)
     button_Medium = Button(width/2 - 100, height/2 + 75, 200, 50, "Medium", 30)
     button_Hard = Button(width/2 - 100, height/2 + 150, 200, 50, "Hard", 30)
-    list_buttons =[button_Easy, button_Medium, button_Hard]
+    button_Customize = Button (width/2 - 100, height/2 + 225, 200, 50 , "Customize", 30)
+    list_buttons = [button_Easy, button_Medium, button_Hard, button_Customize,  button_Back]
 
-
-    
     switch_buttons = {
                         button_Easy : easy_level,
                         button_Medium : medium_level,
                         button_Hard : hard_level
                       }
+
+
+    #Case = 2
+    button_Accept = Button(width/2 - 100, height/2 + 275, 250, 75, "Accept", 40)
+    edit_buttons = [button_Accept, button_Back]
+
+
+
+    timer_error = 0 # 120fps = 2s
+    error_active = False
+    text_error = ""
+    text_width_error = Text("Please, choose another value for the width", 40, 450, height/2 + 225)
+    text_height_error = Text("Please, choose another value for the height", 40, 450, height/2 + 225)
+    text_nbombs_error = Text("There are so many bombs", 40, 450, height/2 + 225)
+    text_void = Text("Missing data to fill in", 40, 450, height/2 + 225)
+    text_width_begin = Text("Width: ", 40, 300, height/2 + 0)
+    text_height_begin = Text("Height: ", 40, 300, height/2 + 75)
+    text_nbombs_begin = Text("Bombs: " , 40, 300, height/2 + 150)
+    text_width_end = Text("(max: 15)", 20, 600, height/2 + 10)
+    text_height_end = Text("(max: 19)", 20, 600, height/2 + 85)
+    all_text = [text_width_begin, text_height_begin, text_nbombs_begin, text_width_end, text_height_end]
+    
+
+    box_width = Box(30, 370, height/2)
+    box_height = Box(30, 370, height/2 + 75)
+    box_nbombs = Box(30, 370, height/2 + 150)
+    all_boxs = [box_width, box_height, box_nbombs]
+
     
     alpha = 0
     alpha_dir = 1
     
-    case = 0  # 0 = Menu principal, 1 = Menu de dificultad
+    case = 0  # 0 = Main Menu, 1 = Difficult Menu, 2 = Customize level
     active_buttons = all_buttons
-    
-    
+    active_text = None
+    active_box = None
+
     while menu:
         if case == 0:
             active_buttons = all_buttons
+            active_text = None
+            active_box = None
         elif case == 1:
             active_buttons = list_buttons
-        
+            active_text = None
+            active_box = None
+        elif case == 2:
+            active_buttons = edit_buttons
+            active_text = all_text
+            active_box = all_boxs
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -211,9 +282,43 @@ def Menu():
                             menu = False
                         elif button == button_Difficult:
                             case = 1
+                        elif button == button_Customize:
+                            case = 2
+                        elif button == button_Back:
+                            case-= 1
+                        elif button == button_Accept:
+                            if box_width.text == "" or box_height.text == "" or box_nbombs.text == "":
+                                error_active = True
+                                text_error = text_void
+                            elif int(box_width.text) > 15:
+                                error_active = True
+                                text_error = text_width_error
+                            elif int(box_height.text) > 19:
+                                error_active = True
+                                text_error = text_height_error
+                            elif int(box_nbombs.text) > int(box_width.text) * int(box_height.text) - 5:
+                                error_active = True
+                                text_error = text_nbombs_error
+                            else:
+                                case = 0
+                                table_size = (int(box_width.text), int(box_height.text), int(box_nbombs.text))
                         else:
                             case = 0
-                            table_size = switch_buttons[button]        
+                            table_size = switch_buttons[button]
+
+            if active_box:
+                for box in active_box:
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        box.inBox(mouse_pos)
+
+                    elif event.type == pygame.KEYDOWN and box.activated:
+                        if event.key == pygame.K_BACKSPACE:
+                            box.text = box.text[:-1]
+                        elif event.unicode.isnumeric() and len(box.text) < 2:
+                            box.text += event.unicode
+
+
+
 
         # Lógica del menú
         mouse_pos = pygame.mouse.get_pos()
@@ -227,6 +332,14 @@ def Menu():
         else:
             timer += 1
         
+
+        if error_active:
+            timer_error += 1
+            if timer_error > 120:
+                timer_error = 0
+                error_active = False
+
+
         # Dibujar pantalla
         screen.fill(screen_color)
         if drawings:    
@@ -237,10 +350,22 @@ def Menu():
         for button in active_buttons:
             button.draw()
         
+        if active_text:
+            for text in active_text:
+                text.draw()
+
+        if active_box:
+            for box in all_boxs:
+                box.draw()
+
+        if error_active:
+            text_error.draw()
+                
+
         alpha += alpha_dir
         if alpha == 255 or alpha == 0:
             alpha_dir *= -1
-        Draw_text(screen, "Mine Seeker", 100, (alpha, alpha, alpha), width/2, height/4)  
+        Draw_text(screen, "Minesweeper", 100, (alpha, alpha, alpha), width/2, height/4)  
         
         pygame.display.update()
         clock.tick(fps)   
@@ -248,7 +373,7 @@ def Menu():
 
 def Game():
     # TODO study optimization for global variables
-    global table_size, menu, mapp, all_cells, all_mapp, n_activated
+    global table_size, menu, mapp, all_cells, all_mapp, n_activated, alive
     first_click = True
 
     width_table = 40 * table_size[0] +5
