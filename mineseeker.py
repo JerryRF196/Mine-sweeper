@@ -22,8 +22,7 @@ class Cell():
         self.flag = False
         self.activated = False
         self.number = None
-        self.drawn = True
-
+        self.drawn = True       # In order to draw once when is activated
     
     def draw(self):
         pygame.draw.rect(screen, self.colour, (self.x , self.y , self.size, self.size))
@@ -387,6 +386,7 @@ def Game():
     alive=True
     restart = False
     winner = False
+    end = False
     
     frames = 0
     seconds = 0
@@ -464,25 +464,25 @@ def Game():
         for button in all_buttons:
             button.inButton(mouse_pos)
         
-        if alive and not winner:
+
+        if not end:
             for row in all_cells:
                 for cell in row:
                     cell.update(mouse_pos)
-        
-        
-        
-        # Drawing
-
-        pygame.draw.rect(screen, table_color, (5, 430, 250, 120))
-        
-        if alive and not winner:
+            if not alive or winner:
+                end = True
+                        
             frames += 1
             if frames == 60:
-                frames = 0
                 seconds += 1
+                frames = 0
                 if seconds == 60:
                     minutes += 1
                     seconds = 0
+        
+        
+        # Drawing
+        pygame.draw.rect(screen, table_color, (5, 430, 250, 120))
     
         for row in all_cells:
             for cell in row:
