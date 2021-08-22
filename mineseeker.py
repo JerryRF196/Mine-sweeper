@@ -482,7 +482,7 @@ def Game():
         
         
         # Drawing
-        pygame.draw.rect(screen, table_color, (5, 430, 250, 120))
+        pygame.draw.rect(screen, table_color, (5, 430, 240, 120))
     
         for row in all_cells:
             for cell in row:
